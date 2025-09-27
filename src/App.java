@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 
 public class App extends ListenerAdapter{
     public static void main(String[] args) throws Exception {
+        String[] commands = {"run", "help"};
         String token = "token";
         if (token == null){
             throw new IllegalStateException("Discord token not found in environmental variables.");
@@ -24,7 +25,7 @@ public class App extends ListenerAdapter{
         }
 
         String message = event.getMessage().getContentRaw();
-
+        //chumba
         if (message.toLowerCase().contains("!run")){
             if (message.substring(5).toLowerCase().contains("chumba")){
                 String[] parts = message.split("\\s+", 4);
@@ -40,8 +41,48 @@ public class App extends ListenerAdapter{
                 System.out.printf("Running %s with account %s:%s", service,email,password);
 
             }
-
             //event.getChannel().sendMessage("Pong!").queue();
         }
     }
+    public static boolean checkFormat(String message, String[] commands) {
+        if (message == null || message.trim().isEmpty()) {
+            return false;
+        }
+        if (!message.startsWith("!")) {
+            return false;
+        }
+    
+        String[] messageParts = message.split("\\s+");
+        if (messageParts.length < 2) {
+            return false;
+        }
+
+        String command = messageParts[1].toLowerCase();
+        if (command.equals("help")) {
+            return messageParts.length == 2;
+        }
+    
+        if (messageParts.length < 4) {
+            return false;
+        }
+        if (!messageParts[2].contains("@")) {
+            return false;
+        }
+    
+        if (messageParts[3].trim().isEmpty()) {
+            return false;
+        }
+        for (String c : commands) {
+            if (command.equalsIgnoreCase(c)) {
+                return true;
+            }
+        }
+    
+        return false;
+    }
 }
+
+
+not 4, false
+not a named command, false
+

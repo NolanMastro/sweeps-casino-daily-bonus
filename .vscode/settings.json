@@ -3,5 +3,6 @@
     "java.project.outputPath": "bin",
     "java.project.referencedLibraries": [
         "lib/JDA-6.0.0-rc.5-withDependencies.jar"
-    ]
+    ],
+    "java.compile.nullAnalysis.mode": "automatic"
 }
