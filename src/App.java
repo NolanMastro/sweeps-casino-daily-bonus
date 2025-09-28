@@ -52,39 +52,27 @@ public class App extends ListenerAdapter{
 
     }
     public static boolean checkFormat(String message, String[] commands) {
-        if (message == null || message.trim().isEmpty()) {
-            return false;
-        }
-        if (!message.startsWith("!")) {
-            return false;
-        }
-    
-        String[] messageParts = message.split("\\s+");
-        if (messageParts.length < 2) {
-            return false;
+        if (message == null || message.trim().isEmpty()) return false;
+        if (!message.startsWith("!")) return false;
+
+        String[] parts = message.split("\\s+");
+        if (parts.length < 2) return false;
+
+        String command = parts[1].toLowerCase();
+
+        if (command.equals("help")) {
+            return parts.length == 2;
         }
 
-        String command = messageParts[1].toLowerCase();
-        if (command.equals("help")) {
-            return messageParts.length == 2;
-        }
-    
-        if (messageParts.length < 4) {
-            return false;
-        }
-        if (!messageParts[2].contains("@")) {
-            return false;
-        }
-    
-        if (messageParts[3].trim().isEmpty()) {
-            return false;
-        }
+        if (parts.length < 4) return false;
+        if (!parts[2].contains("@")) return false;
+        if (parts[3].trim().isEmpty()) return false;
+
         for (String c : commands) {
             if (command.equalsIgnoreCase(c)) {
                 return true;
             }
         }
-    
         return false;
     }
 }
