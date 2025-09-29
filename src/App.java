@@ -38,6 +38,8 @@ public class App extends ListenerAdapter{
                 String email = parts[2].trim();
                 String password = parts[3].trim();
 
+
+
                 System.out.printf("Running #s for %s:%s", service, email, password);
             }
 
@@ -51,6 +53,34 @@ public class App extends ListenerAdapter{
 
 
     }
+
+
+    private void runPythonScript(MessageReceivedEvent event, String scriptPath, String email, String password) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("python", scriptPath, email, password); // can make scriptPath final, then add just name at end.
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            BufferedReader console = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            StringBuilder output = new StringBuilder();
+            String line;
+
+            while ((line = console.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                event.getChannel().sendMessage("Script completed successfully.").queue();
+            } else {
+                event.getChannel().sendMessage("Script failed..."); //TODO add mentions, user name, and script name in messages.
+            }
+        } catch (Exception e) {
+            event.getChannel().sendMessage("Script failed... " + e);
+        }
+    }
+
+
     public static boolean checkFormat(String message, String[] commands) {
         if (message == null || message.trim().isEmpty()) return false;
         if (!message.startsWith("!")) return false;
