@@ -10,12 +10,10 @@ import java.io.InputStreamReader;
 public class App extends ListenerAdapter{
 
     private static final String[] commands = {"run", "help"};
+    private static final String path = "scripts/";
     public static void main(String[] args) throws Exception {
         
         String token = "token";
-        if (token == null){
-            throw new IllegalStateException("Discord token not found in environmental variables.");
-        }
 
         JDABuilder.createDefault(token).enableIntents(GatewayIntent.MESSAGE_CONTENT) .addEventListeners(new App()).build();
     }
@@ -27,8 +25,9 @@ public class App extends ListenerAdapter{
         }
 
         String message = event.getMessage().getContentRaw();
+        StringBuilder m = new StringBuilder(message)
         
-        if (checkformat(message, commands)){
+        if (checkformat(m, commands)){
             String[] parts = message.split("\\s+", 4);
             String command = parts[1].toLowerCase();
 
@@ -41,6 +40,7 @@ public class App extends ListenerAdapter{
 
 
                 System.out.printf("Running #s for %s:%s", service, email, password);
+                runPythonScript(event, "test", "asd", "asd");
             }
 
             if (command.equals("help")){ //TODO add embed help message.
@@ -55,9 +55,9 @@ public class App extends ListenerAdapter{
     }
 
 
-    private void runPythonScript(MessageReceivedEvent event, String scriptPath, String email, String password) {
+    private void runPythonScript(MessageReceivedEvent event, String scriptName, String email, String password) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("python", scriptPath, email, password); // can make scriptPath final, then add just name at end.
+            ProcessBuilder pb = new ProcessBuilder("python", path+scriptName+".py" , email, password);
             pb.redirectErrorStream(true);
             Process process = pb.start();
 
@@ -71,7 +71,7 @@ public class App extends ListenerAdapter{
 
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                event.getChannel().sendMessage("Script completed successfully.").queue();
+                event.getChannel().sendMessage("Script completed successfully." + output).queue();
             } else {
                 event.getChannel().sendMessage("Script failed..."); //TODO add mentions, user name, and script name in messages.
             }
@@ -106,7 +106,3 @@ public class App extends ListenerAdapter{
         return false;
     }
 }
-
-
-not 4, false
-not a named command, false
