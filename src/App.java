@@ -11,45 +11,44 @@ public class App extends ListenerAdapter{
 
     private static final String[] commands = {"run", "help"};
     private static final String path = "scripts/";
+    private static long nonoId = 1384615269384720488L;
     public static void main(String[] args) throws Exception {
         
-        String token = "token";
+        String token = "";
 
         JDABuilder.createDefault(token).enableIntents(GatewayIntent.MESSAGE_CONTENT) .addEventListeners(new App()).build();
     }
 
     @Override
-    public void onMessageReceived(MessageReceivedEvent event){
+    public void onMessageReceived(@javax.annotation.Nonnull MessageReceivedEvent event){
         if (event.getAuthor().isBot()){
             return;
         }
 
         String message = event.getMessage().getContentRaw();
-        StringBuilder m = new StringBuilder(message)
         
-        if (checkformat(m, commands)){
-            String[] parts = message.split("\\s+", 4);
-            String command = parts[1].toLowerCase();
 
-            //chumba
+        if (checkFormat(message, commands)){
+            String[] parts = message.split("\\s+", 4); //max 4 parameters for disc cmds
+            String command = parts[0].substring(1).toLowerCase();
+
             if (command.equals("run")){
-                String service = parts[1].toLowerCase();
-                String email = parts[2].trim();
-                String password = parts[3].trim();
+                if (parts.length < 4) {
+                    event.getChannel().sendMessage("Invalid !run format. Use: `!run <service> <email> <password>`").queue();
+                    return;
+                }
 
+                String service = parts[1];
+                String email = parts[2];
+                String password = parts[3];
 
-
-                System.out.printf("Running #s for %s:%s", service, email, password);
-                runPythonScript(event, "test", "asd", "asd");
+                System.out.printf("Running %s for %s:%s%n", service, email, password);
+                runPythonScript(event, service, email, password);
             }
-
-            if (command.equals("help")){ //TODO add embed help message.
+            if (command.equals("help")){
                 event.getChannel().sendMessage("Usage: `!run <service> <email> <password>`").queue();
             }
-        }else{
-            event.getChannel().sendMessage("Invalid command format. Try `!help`.").queue();
         }
-
 
 
     }
@@ -71,38 +70,56 @@ public class App extends ListenerAdapter{
 
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                event.getChannel().sendMessage("Script completed successfully." + output).queue();
+                event.getMessage().reply(scriptName+".py ran successfuly. Response: " + output).queue();
             } else {
-                event.getChannel().sendMessage("Script failed..."); //TODO add mentions, user name, and script name in messages.
+                event.getMessage().reply(scriptName +".py failed. Please try again later.");
             }
         } catch (Exception e) {
-            event.getChannel().sendMessage("Script failed... " + e);
+            event.getMessage().reply(scriptName +".py reponse lost. Please contact @nono Error: " + e);
         }
     }
 
 
     public static boolean checkFormat(String message, String[] commands) {
+
         if (message == null || message.trim().isEmpty()) return false;
+        if (message.toLowerCase().contains("help")){
+            return true;
+        }
         if (!message.startsWith("!")) return false;
 
         String[] parts = message.split("\\s+");
-        if (parts.length < 2) return false;
+        if (parts.length < 1) return false;
 
-        String command = parts[1].toLowerCase();
+        String command = parts[0].substring(1).toLowerCase();
 
         if (command.equals("help")) {
-            return parts.length == 2;
+            return parts.length == 1;
         }
 
-        if (parts.length < 4) return false;
-        if (!parts[2].contains("@")) return false;
-        if (parts[3].trim().isEmpty()) return false;
-
+        boolean validCommand = false;
         for (String c : commands) {
             if (command.equalsIgnoreCase(c)) {
-                return true;
+                validCommand = true;
+                break;
             }
         }
-        return false;
+        if (!validCommand) return false;
+
+        if (command.equals("run")) {
+            if (parts.length != 4){
+                 return false;
+            }
+            if (!parts[2].contains("@")){
+                return false;
+            }
+            if (parts[3].trim().isEmpty()){
+                return false;
+            }
+        }
+
+        return true;
     }
+    
+
 }
