@@ -1,14 +1,14 @@
-public class UserSession {
-    public String service;
-    public String email;
-    public String password;
-    public String extraAnswer;
-    public String name;
-    public int stage = 1;
+class UserSession {
+    String service;
+    String casinoEmail;
+    String casinoPassword;
+    String gmail;
+    String gmailPassword;
+    int stage = 1;
 
-    public UserSession(String service, String email, String password) {
+    UserSession(String service, String casinoEmail, String casinoPassword) {
         this.service = service;
-        this.email = email;
-        this.password = password;
+        this.casinoEmail = casinoEmail;
+        this.casinoPassword = casinoPassword;
     }
 }
