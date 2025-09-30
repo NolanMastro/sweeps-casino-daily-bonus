@@ -5,6 +5,9 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 public class App extends ListenerAdapter{
@@ -12,6 +15,8 @@ public class App extends ListenerAdapter{
     private static final String[] commands = {"run", "help"};
     private static final String path = "scripts/";
     private static long nonoId = 1384615269384720488L;
+    private final Map<Long, UserSession> sessions = new HashMap<>();
+
     public static void main(String[] args) throws Exception {
         
         String token = "";
@@ -26,7 +31,23 @@ public class App extends ListenerAdapter{
         }
 
         String message = event.getMessage().getContentRaw();
+        long userId = event.getAuthor().getIdLong();
         
+        //check if user is in session storage
+        if (sessions.containsKey(userId)){
+            UserSession session = sessions.get(userId);
+            if (session.stage == 1){
+                session.extraQuestion = message;
+                event.getChannel().sendMessage("Please send email password").queue();
+                session.stage = 2;
+            }else if (session.stage == 2){
+                session.name = message;
+                event.getChannel().sendMessage("Running script.").queue();
+                runPythonScript(event, session.service, session.email, session.password, session.extraQuestion, session.name);
+                sessions.remove(userId);
+            }
+            return;
+        }
 
         if (checkFormat(message, commands)){
             String[] parts = message.split("\\s+", 4); //max 4 parameters for disc cmds
@@ -42,8 +63,12 @@ public class App extends ListenerAdapter{
                 String email = parts[2];
                 String password = parts[3];
 
-                System.out.printf("Running %s for %s:%s%n", service, email, password);
-                runPythonScript(event, service, email, password);
+                UserSession session = new UserSession(service, email, password);
+                sessions.put(userId, session);
+                event.getChannel().sendMessage("answer before running").queue();
+
+                //System.out.printf("Running %s for %s:%s%n", service, email, password);
+                //runPythonScript(event, service, email, password);
             }
             if (command.equals("help")){
                 event.getChannel().sendMessage("Usage: `!run <service> <email> <password>`").queue();
