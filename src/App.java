@@ -80,13 +80,10 @@ public class App extends ListenerAdapter {
         }
     }
 
-    private void runPythonScript(MessageReceivedEvent event, String scriptName,
-                                 String casinoEmail, String casinoPassword,
-                                 String gmail, String gmailPassword) {
+    private void runPythonScript(MessageReceivedEvent event, String scriptName, String casinoEmail, String casinoPassword, String gmail, String gmailPassword) {
         try {
-            ProcessBuilder pb = new ProcessBuilder(
-                    "python", path + scriptName + ".py",
-                    casinoEmail, casinoPassword, gmail, gmailPassword
+            ProcessBuilder pb = new ProcessBuilder("python", path + scriptName + ".py",
+            casinoEmail, casinoPassword, gmail, gmailPassword
             );
             pb.redirectErrorStream(true);
             Process process = pb.start();

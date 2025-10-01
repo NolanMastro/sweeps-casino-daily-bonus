@@ -1,4 +1,4 @@
-class UserSession {
+class UserSession { // basic class to store user details mid command
     String service;
     String casinoEmail;
     String casinoPassword;

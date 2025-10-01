@@ -1,0 +1,1 @@
+#add_extension(extension_path) within config options for nodriver to ensure working.  can also use proxy.
