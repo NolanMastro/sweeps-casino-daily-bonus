@@ -14,6 +14,8 @@ public class App extends ListenerAdapter {
     private static final String path = "scripts/";
     private final Map<Long, UserSession> sessions = new HashMap<>();
 
+
+
     public static void main(String[] args) throws Exception {
         String token = "token";
         JDABuilder.createDefault(token)
@@ -82,7 +84,7 @@ public class App extends ListenerAdapter {
 
     private void runPythonScript(MessageReceivedEvent event, String scriptName, String casinoEmail, String casinoPassword, String gmail, String gmailPassword) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("python", path + scriptName + ".py",
+            ProcessBuilder pb = new ProcessBuilder("python3", path + scriptName + ".py",
             casinoEmail, casinoPassword, gmail, gmailPassword
             );
             pb.redirectErrorStream(true);
@@ -100,10 +102,10 @@ public class App extends ListenerAdapter {
             if (exitCode == 0) {
                 event.getMessage().reply(scriptName + ".py ran successfully. Response: " + output).queue();
             } else {
-                event.getMessage().reply(scriptName + ".py failed. Please try again later.").queue();
+                event.getMessage().reply(scriptName + ".py failed. Please try again later. exit code " + exitCode).queue();
             }
         } catch (Exception e) {
-            event.getMessage().reply(scriptName + ".py response lost. Please contact @nono Error: " + e).queue();
+            event.getMessage().reply(scriptName + ".py response lost. Please contact @nono").queue();
         }
     }
 
