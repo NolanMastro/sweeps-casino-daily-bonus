@@ -96,9 +96,6 @@ async def claim_daily(browser, casino_email, casino_password, gmail, gmail_passw
     await verify_button.click()
 
     #logged in!
-
-    
-
     get_coins = await page.find("get coins", best_match=True)
     await get_coins.click()
 
