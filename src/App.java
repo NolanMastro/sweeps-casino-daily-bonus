@@ -14,10 +14,8 @@ public class App extends ListenerAdapter {
     private static final String path = "scripts/";
     private final Map<Long, UserSession> sessions = new HashMap<>();
 
-
-
     public static void main(String[] args) throws Exception {
-        String token = "token";
+        String token = "";
         JDABuilder.createDefault(token)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .addEventListeners(new App())
@@ -73,7 +71,24 @@ public class App extends ListenerAdapter {
                 UserSession session = new UserSession(service, casinoEmail, casinoPassword);
                 sessions.put(userId, session);
 
-                event.getChannel().sendMessage("Please enter your Gmail and App Password. Format: `email@gmail.com:AppPasswordHere`").queue();
+                //only services needing 2fa
+                String[] servicesNeedingGmail = {"chumba", "pulse", "luckyland"};
+
+                boolean needsGmail = false;
+                for (String s : servicesNeedingGmail) {
+                    if (service.equalsIgnoreCase(s)) {
+                        needsGmail = true;
+                        break;
+                    }
+                }
+
+                if (needsGmail) {
+                    event.getChannel().sendMessage("Please enter your Gmail and App Password. Format: `email@gmail.com:AppPasswordHere`").queue();
+                } else {
+                    event.getChannel().sendMessage("Running script... (no Gmail needed)").queue();
+                    runPythonScript(event, session.service, session.casinoEmail, session.casinoPassword, "", "");
+                    sessions.remove(userId);
+                }
             }
 
             if (command.equals("help")) {
@@ -84,7 +99,7 @@ public class App extends ListenerAdapter {
 
     private void runPythonScript(MessageReceivedEvent event, String scriptName, String casinoEmail, String casinoPassword, String gmail, String gmailPassword) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("python3", path + scriptName + ".py",
+            ProcessBuilder pb = new ProcessBuilder("python", path + scriptName + ".py",
             casinoEmail, casinoPassword, gmail, gmailPassword
             );
             pb.redirectErrorStream(true);

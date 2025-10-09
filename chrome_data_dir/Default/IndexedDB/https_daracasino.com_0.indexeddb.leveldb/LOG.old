@@ -1,0 +1,25 @@
+2025/10/08-18:50:46.877 1e6ac Reusing MANIFEST C:\Code\sweepsDaily\sweepsDaily\chrome_data_dir\Default\IndexedDB\https_daracasino.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/10/08-18:50:46.877 1e6ac Recovering log #19
+2025/10/08-18:50:46.877 1e6ac Reusing old log C:\Code\sweepsDaily\sweepsDaily\chrome_data_dir\Default\IndexedDB\https_daracasino.com_0.indexeddb.leveldb/000019.log 
+2025/10/08-18:50:46.878 1e6ac Delete type=2 #18
+2025/10/08-18:50:47.058 1e478 Level-0 table #24: started
+2025/10/08-18:50:47.061 1e478 Level-0 table #24: 6407 bytes OK
+2025/10/08-18:50:47.063 1e478 Delete type=0 #19
+2025/10/08-18:50:47.063 1e6ac Manual compaction at level-0 from '\x00\x0b\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x0c\x00\x00\x00' @ 0 : 0; will stop at '\x00\x0b\x00\x00\x05' @ 551 : 1
+2025/10/08-18:50:47.063 1e6ac Compacting 1@0 + 1@1 files
+2025/10/08-18:50:47.064 1e6ac Generated table #25@0: 120 keys, 3515 bytes
+2025/10/08-18:50:47.064 1e6ac Compacted 1@0 + 1@1 files => 3515 bytes
+2025/10/08-18:50:47.065 1e6ac compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/10/08-18:50:47.065 1e6ac Delete type=2 #24
+2025/10/08-18:50:47.065 1e6ac Manual compaction at level-0 from '\x00\x0b\x00\x00\x05' @ 551 : 1 .. '\x00\x0c\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/10/08-18:50:47.142 1e53c Level-0 table #27: started
+2025/10/08-18:50:47.144 1e53c Level-0 table #27: 771 bytes OK
+2025/10/08-18:50:47.145 1e53c Delete type=2 #21
+2025/10/08-18:50:47.145 1e53c Delete type=0 #23
+2025/10/08-18:50:47.146 1e6ac Manual compaction at level-0 from '\x00\x0c\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x0d\x00\x00\x00' @ 0 : 0; will stop at '\x00\x0c\x00\x00\x05' @ 573 : 1
+2025/10/08-18:50:47.146 1e6ac Compacting 1@0 + 1@1 files
+2025/10/08-18:50:47.147 1e6ac Generated table #28@0: 120 keys, 3375 bytes
+2025/10/08-18:50:47.147 1e6ac Compacted 1@0 + 1@1 files => 3375 bytes
+2025/10/08-18:50:47.148 1e6ac compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/10/08-18:50:47.148 1e6ac Delete type=2 #27
+2025/10/08-18:50:47.148 1e6ac Manual compaction at level-0 from '\x00\x0c\x00\x00\x05' @ 573 : 1 .. '\x00\x0d\x00\x00\x00' @ 0 : 0; will stop at (end)

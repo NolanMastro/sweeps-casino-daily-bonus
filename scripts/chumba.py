@@ -71,7 +71,7 @@ async def claim_daily(browser, casino_email, casino_password, gmail, gmail_passw
             await login_button.click()
             break
         except:
-            asyncio.sleep(5)
+            await asyncio.sleep(5)
             continue
     
     send_code = await page.find("send code", best_match=True)
@@ -107,6 +107,7 @@ async def claim_daily(browser, casino_email, casino_password, gmail, gmail_passw
     try:
         claim = await page.find("Claim", best_match=True, timeout=5)
         await claim.click()
+        await asyncio.sleep(2)
         print(f"[Success] claimed daily bonus for {casino_email}")
     except:
         print(f"[Fail] Daily bonus already claimed for {casino_email}")
