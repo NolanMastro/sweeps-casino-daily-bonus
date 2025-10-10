@@ -1,166 +1,139 @@
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class App extends ListenerAdapter {
 
-    private static final String[] commands = {"run", "help"};
-    private static final String path = "scripts/";
-    private final Map<Long, UserSession> sessions = new HashMap<>();
+    private static final String SCRIPTS_PATH = "scripts/";
 
     public static void main(String[] args) throws Exception {
-        String token = "";
-        JDABuilder.createDefault(token)
-                .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-                .addEventListeners(new App())
-                .build();
-    }
+    String token = "token";
+    String GUILD_ID = "1420870365890220105";//temp
+
+    JDA jda = JDABuilder.createDefault(token)
+            .addEventListeners(new App())
+            .build();
+
+    jda.awaitReady();
+
+    //temporary just to show slash commands instantly for my guild.
+    OptionData serviceOption = new OptionData(OptionType.STRING, "service", "Service name", true)
+        .addChoice("Chumba", "chumba")
+        .addChoice("Dara", "dara")
+        .addChoice("Modo", "modo");
+
+    jda.getGuildById(GUILD_ID)
+            .updateCommands()
+            .addCommands(
+                    Commands.slash("run", "Run a script")
+                            .addOptions(
+                                    serviceOption,
+                                    new OptionData(OptionType.STRING, "email", "Casino email", true),
+                                    new OptionData(OptionType.STRING, "password", "Casino password", true)
+                            ),
+                    Commands.slash("setgmail", "Set your Gmail and App Password")
+                            .addOption(OptionType.STRING, "email", "Your Gmail", true)
+                            .addOption(OptionType.STRING, "app_password", "Your Gmail App Password", true),
+                    Commands.slash("help", "Show help info")
+            ).queue();
+
+
+    System.out.println("Bot is ready and slash commands registered for guild " + GUILD_ID);
+}
 
     @Override
-    public void onMessageReceived(@javax.annotation.Nonnull MessageReceivedEvent event) {
-        if (event.getAuthor().isBot()) {
-            return;
-        }
+    public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
+        String name = event.getName();
 
-        String message = event.getMessage().getContentRaw();
-        long userId = event.getAuthor().getIdLong();
-
-        //if user is already in session
-        if (sessions.containsKey(userId)) {
-            UserSession session = sessions.get(userId);
-
-            if (session.stage == 1) {
-                if (!message.contains(":")) {
-                    event.getChannel().sendMessage("Invalid format. Use: `email@gmail.com:AppPasswordHere`").queue();
-                    return;
-                }
-
-                String[] creds = message.split(":", 2);
-                session.gmail = creds[0];
-                session.gmailPassword = creds[1];
-                session.stage = 2;
-
-                event.getChannel().sendMessage("Got your credentials. Running script...").queue();
-                runPythonScript(event, session.service, session.casinoEmail, session.casinoPassword, session.gmail, session.gmailPassword);
-                sessions.remove(userId);
-            }
-            return;
-        }
-
-        //inital command, user is not in session
-        if (checkFormat(message, commands)) {
-            String[] parts = message.split("\\s+", 4);
-            String command = parts[0].substring(1).toLowerCase();
-
-            if (command.equals("run")) {
-                if (parts.length < 4) {
-                    event.getChannel().sendMessage("Invalid !run format. Use: `!run <service> <email> <password>`").queue();
-                    return;
-                }
-
-                String service = parts[1];
-                String casinoEmail = parts[2];
-                String casinoPassword = parts[3];
-
-                UserSession session = new UserSession(service, casinoEmail, casinoPassword);
-                sessions.put(userId, session);
-
-                //only services needing 2fa
-                String[] servicesNeedingGmail = {"chumba", "pulse", "luckyland"};
-
-                boolean needsGmail = false;
-                for (String s : servicesNeedingGmail) {
-                    if (service.equalsIgnoreCase(s)) {
-                        needsGmail = true;
-                        break;
-                    }
-                }
-
-                if (needsGmail) {
-                    event.getChannel().sendMessage("Please enter your Gmail and App Password. Format: `email@gmail.com:AppPasswordHere`").queue();
-                } else {
-                    event.getChannel().sendMessage("Running script... (no Gmail needed)").queue();
-                    runPythonScript(event, session.service, session.casinoEmail, session.casinoPassword, "", "");
-                    sessions.remove(userId);
-                }
-            }
-
-            if (command.equals("help")) {
-                event.getChannel().sendMessage("Usage: `!run <service> <email> <password>`").queue();
-            }
+        switch (name) {
+            case "run" -> handleRunCommand(event);
+            case "setgmail" -> handleSetGmailCommand(event);
+            case "help" -> handleHelpCommand(event);
         }
     }
 
-    private void runPythonScript(MessageReceivedEvent event, String scriptName, String casinoEmail, String casinoPassword, String gmail, String gmailPassword) {
-        try {
-            ProcessBuilder pb = new ProcessBuilder("python", path + scriptName + ".py",
-            casinoEmail, casinoPassword, gmail, gmailPassword
-            );
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
 
-            BufferedReader console = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder output = new StringBuilder();
-            String line;
+    private void handleSetGmailCommand(SlashCommandInteractionEvent event) {
+        String gmail = event.getOption("email").getAsString().strip();
+        String appPassword = event.getOption("app_password").getAsString().strip();
+        long userId = event.getUser().getIdLong();
 
-            while ((line = console.readLine()) != null) {
-                output.append(line).append("\n");
-            }
+        UserStorage.setUserData(userId, gmail, appPassword);
+        event.reply("[Success] Saved gmail and app password.").queue();
+    }
 
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                event.getMessage().reply(scriptName + ".py ran successfully. Response: " + output).queue();
+    private void handleRunCommand(SlashCommandInteractionEvent event) {
+        String service = event.getOption("service").getAsString();
+        String casinoEmail = event.getOption("email").getAsString();
+        String casinoPassword = event.getOption("password").getAsString();
+        long userId = event.getUser().getIdLong();
+
+        //try to get saved gmail and app password data
+        UserStorage.UserData userData = UserStorage.getUserData(userId);
+        String gmail = userData != null ? userData.gmail : "";
+        String appPassword = userData != null ? userData.appPassword : "";
+
+        event.reply("Running script.").queue();
+
+        runPythonScriptAsync(service, casinoEmail, casinoPassword, gmail, appPassword, (output, success) -> {
+            TextChannel channel = event.getChannel().asTextChannel();
+            if (success) {
+                channel.sendMessage("Script `" + service + ".py` ran successfully:\n```\n" + output + "\n```").queue();
             } else {
-                event.getMessage().reply(scriptName + ".py failed. Please try again later. exit code " + exitCode).queue();
+                channel.sendMessage("Script `" + service + ".py` failed. Please try again later.").queue();
             }
-        } catch (Exception e) {
-            event.getMessage().reply(scriptName + ".py response lost. Please contact @nono").queue();
-        }
+        });
     }
 
-    public static boolean checkFormat(String message, String[] commands) {
-        if (message == null || message.trim().isEmpty()) return false;
-        if (message.toLowerCase().contains("help")) {
-            return true;
-        }
-        if (!message.startsWith("!")) return false;
+    private void handleHelpCommand(SlashCommandInteractionEvent event) {
+        String helpMsg = "**Available Commands:**\n" +
+                "/run <service> <email> <password> - Run a script\n" +
+                "/setgmail <email> <app_password> - Save Gmail and App Password locally\n" +
+                "/help - Show this message";
+        event.reply(helpMsg).queue();
+    }
 
-        String[] parts = message.split("\\s+");
-        if (parts.length < 1) return false;
 
-        String command = parts[0].substring(1).toLowerCase();
 
-        if (command.equals("help")) {
-            return parts.length == 1;
-        }
 
-        boolean validCommand = false;
-        for (String c : commands) {
-            if (command.equalsIgnoreCase(c)) {
-                validCommand = true;
-                break;
+    private void runPythonScriptAsync(String scriptName, String casinoEmail, String casinoPassword,
+                                      String gmail, String gmailPassword, PythonCallback callback) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                ProcessBuilder pb = new ProcessBuilder("python", SCRIPTS_PATH + scriptName + ".py",
+                casinoEmail, casinoPassword, gmail, gmailPassword);
+                pb.redirectErrorStream(true);
+                Process process = pb.start();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                StringBuilder output = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
+
+                int exitCode = process.waitFor();
+                boolean success = exitCode == 0;
+                callback.onComplete(output.toString(), success);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                callback.onComplete("", false);
             }
-        }
-        if (!validCommand) return false;
+        });
+    }
 
-        if (command.equals("run")) {
-            if (parts.length != 4) {
-                return false;
-            }
-            if (!parts[2].contains("@")) {
-                return false;
-            }
-            if (parts[3].trim().isEmpty()) {
-                return false;
-            }
-        }
-
-        return true;
+    interface PythonCallback {
+        void onComplete(String output, boolean success);
     }
 }

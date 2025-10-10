@@ -105,7 +105,7 @@ async def claim_daily(browser, casino_email, casino_password, gmail, gmail_passw
     await page.scroll_down(150)
 
     try:
-        claim = await page.find("Claim", best_match=True, timeout=5)
+        claim = await page.find("Claim", best_match=True, timeout=5) #TODO update to selector, clicks wrong stuff
         await claim.click()
         await asyncio.sleep(2)
         print(f"[Success] claimed daily bonus for {casino_email}")
