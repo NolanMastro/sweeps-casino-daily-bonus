@@ -17,8 +17,18 @@ public class App extends ListenerAdapter {
     private static final String SCRIPTS_PATH = "scripts/";
 
     public static void main(String[] args) throws Exception {
-    String token = "token";
-    String GUILD_ID = "1420870365890220105";//temp
+    String token = System.getenv("DISCORD_BOT_TOKEN");
+    String GUILD_ID = System.getenv("DISCORD_GUILD_ID");
+    
+    if (token == null || token.isEmpty()) {
+        System.err.println("Error: DISCORD_BOT_TOKEN environment variable is not set");
+        System.exit(1);
+    }
+    
+    if (GUILD_ID == null || GUILD_ID.isEmpty()) {
+        System.err.println("Error: DISCORD_GUILD_ID environment variable is not set");
+        System.exit(1);
+    }
 
     JDA jda = JDABuilder.createDefault(token)
             .addEventListeners(new App())
@@ -110,7 +120,7 @@ public class App extends ListenerAdapter {
                                       String gmail, String gmailPassword, PythonCallback callback) {
         CompletableFuture.runAsync(() -> {
             try {
-                ProcessBuilder pb = new ProcessBuilder("python", SCRIPTS_PATH + scriptName + ".py",
+                ProcessBuilder pb = new ProcessBuilder("python3", SCRIPTS_PATH + scriptName + ".py",
                 casinoEmail, casinoPassword, gmail, gmailPassword);
                 pb.redirectErrorStream(true);
                 Process process = pb.start();

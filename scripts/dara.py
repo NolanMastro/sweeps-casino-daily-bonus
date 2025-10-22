@@ -1,7 +1,13 @@
 import sys
+import os
 import nodriver as uc
 from nodriver import *
 import asyncio
+
+# Load environment variables from .env file
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from env_loader import load_env_file, get_env_var
+load_env_file()
 
 
 
@@ -45,8 +51,10 @@ async def main():
     casino_email = sys.argv[1]
     casino_password = sys.argv[2]
 
+    chrome_data_dir = get_env_var("CHROME_DATA_DIR")
+    
     browser = await uc.start(
-        user_data_dir=r"C:\Code\sweepsDaily\sweepsDaily\chrome_data_dir"
+        user_data_dir=chrome_data_dir
     )
 
     await claim_daily(browser, casino_email, casino_password)

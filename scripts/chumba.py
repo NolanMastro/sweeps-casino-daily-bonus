@@ -1,10 +1,16 @@
 import sys
+import os
 import nodriver as uc
 import asyncio
 import imaplib
 import email
 import re
 from bs4 import BeautifulSoup
+
+# Load environment variables from .env file
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from env_loader import load_env_file
+load_env_file()
 
 
 
