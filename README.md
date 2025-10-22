@@ -24,7 +24,7 @@ A Discord bot that automates claiming daily bonuses from various sweeps casinos.
 ### 1. Clone and Setup
 
 ```bash
-git clone <repository-url>
+git clone [<repository-url>](https://github.com/NolanMastro/sweeps-casino-daily-bonus.git)
 cd sweeps-casino-daily-bonus
 ```
 
@@ -72,6 +72,8 @@ javac -cp "lib/JDA-6.0.0-rc.5-withDependencies.jar" src/*.java -d bin/
 
 # Start the bot
 java -cp "bin:lib/JDA-6.0.0-rc.5-withDependencies.jar" App
+
+# invite the discord bot to your server @ https://discord.com/developers/
 ```
 
 ## Discord Commands
